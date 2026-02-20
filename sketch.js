@@ -160,7 +160,10 @@ function draw() {
     noFill();
     stroke('rgb(255, 101, 214)');
     strokeWeight(5);
-    rect(startX, startY, mouseX - startX, mouseY - startY);
+    // Use touch position if available, otherwise use mouse position
+    let currentX = touches.length > 0 ? touches[0].x : mouseX;
+    let currentY = touches.length > 0 ? touches[0].y : mouseY;
+    rect(startX, startY, currentX - startX, currentY - startY);
   }
 }
 
@@ -180,12 +183,25 @@ function mousePressed() {
 }
 
 function mouseReleased() {
+  handleRelease(mouseX, mouseY);
+}
+
+function touchEnded() {
+  // Use the last known touch position or current mouse position
+  let endX = touches.length > 0 ? touches[0].x : mouseX;
+  let endY = touches.length > 0 ? touches[0].y : mouseY;
+  handleRelease(endX, endY);
+  // Prevent default behavior to avoid triggering mouse events
+  return false;
+}
+
+function handleRelease(endX, endY) {
   if (isDragging) {
     // Add all pixels within the rectangle
-    let x1 = min(startX, mouseX);
-    let y1 = min(startY, mouseY);
-    let x2 = max(startX, mouseX);
-    let y2 = max(startY, mouseY);
+    let x1 = min(startX, endX);
+    let y1 = min(startY, endY);
+    let x2 = max(startX, endX);
+    let y2 = max(startY, endY);
     
     for (let x = x1; x < x2; x += pixelSize) {
       for (let y = y1; y < y2; y += pixelSize) {
@@ -235,4 +251,14 @@ function mouseReleased() {
     
     isDragging = false;
   }
+}
+
+function touchStarted() {
+  if (touches.length > 0) {
+    startX = touches[0].x;
+    startY = touches[0].y;
+    isDragging = true;
+  }
+  // Prevent default behavior to avoid scrolling
+  return false;
 }
