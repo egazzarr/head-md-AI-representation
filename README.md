@@ -27,15 +27,24 @@ By the end of this workshop, participants will:
 
 This workshop is open to all students who care about a collective future of design. No technical skills are required — just a willingness to learn new things, roll up one’s sleeves, and build something together. All parts of the workshop will be group activities.
 
-### PROJECT: REPRESENTING THE VISIBLE AND THE INVISIBLE
+### PROJECT: What does representation mean for AI
+
+We start from the reflection that while a human can make mistakes, and she can be forgiven for them, we are much more scared about AI making mistakes, as the AI entity is something that we expect to be perfect. Many people trust it without questioning it. AI becomes the religion of the modern age. It is not human, it cannot feel things, and we wonder how its world of representations might look like. As all humans have slightly different representations of the world 'tree' based on experience, it is interesting to notice that this representation is an accumulation of all images, but it does not usually take a precise, defined form in our brain. It is the platonic world of ideas, maybe innate, maybe coming from experience. Now, what does the representation of a concept look like for an AI? It is just the most probable outcome, a merging of billions of images of trees, coming out of an immense noise background. During the workshop, we investigated how to represent the inverse diffusion process of image generation by embodying it in physical form through some silver plated paper cuttings, going from noise pixels to a tree, and in digital form with a simple p5.js webpage through which the public is able to discover what is behind the image generation process, by using many pictures of trees taken by us during the week. 
+
+| | |
+|---|---|
+| ![](4.jpeg) | ![](3.jpeg) |
+| ![](1.jpeg) | ![](2.jpeg) |
+
+Inspiration: https://arxiv.org/pdf/2203.05922
+
+We explored image generation with local Stable Diffusion models and local voice cloning to represent how we come to consider AI as an extension of ourselves. 
+
+
 
 Github voice clone: https://github.com/shamspias/vibevoice-studio
-Inspiration: https://arxiv.org/pdf/2203.05922
-RaberryPi address: sasha
-username: elena
-pwd: code
-
 to clone voice with AI running locally, clone this repo and type in your terminal: 
+
 ```
 cd vibevoice-studio
 source venv/bin/activate$

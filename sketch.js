@@ -9,6 +9,10 @@ let flickerDuration = 7; // 7 seconds of flickering
 let flickerInterval = 400; // 0.007 seconds between flickers
 let fadeStartTime = 10000; // Start fading after 15 seconds
 let fadeOutDuration = 1000; // 3 seconds fade out duration
+let imgWidth, imgHeight, imgX, imgY; // Image dimensions and position
+let mainTreeOptions = [1, 8, 9, 6]; // Cycle through these trees
+let mainTreeIndex; // Selected main tree index
+let mainTree; // The actual main tree image
 
 function preload() {
   tree1 = loadImage('tree1.jpeg');
@@ -26,37 +30,60 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noStroke();
+  
+  // Select one of the main trees cyclically based on current time
+  let cycleIndex = floor((millis() / 100) % mainTreeOptions.length);
+  mainTreeIndex = mainTreeOptions[cycleIndex];
+  
+  // Assign the actual tree image
+  if (mainTreeIndex === 1) mainTree = tree1;
+  else if (mainTreeIndex === 6) mainTree = tree6;
+  else if (mainTreeIndex === 8) mainTree = tree8;
+  else if (mainTreeIndex === 9) mainTree = tree9;
+  
+  calculateImageDimensions();
+}
+
+function calculateImageDimensions() {
+  // Calculate dimensions to fit height while maintaining aspect ratio
+  // Make image 85% of screen height to leave space for pink background top and bottom
+  imgHeight = height * 0.85;
+  imgWidth = mainTree.width * (imgHeight / mainTree.height);
+  imgX = (width - imgWidth) / 2;
+  imgY = (height - imgHeight) / 2;
 }
  
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   revealedPixels = [];
+  calculateImageDimensions();
 }
 
 function draw() {
-  background(255);
+  // Pink background
+  background('rgb(255, 101, 214)');
   
   // Draw tree2, 3, 4, 5, 6, 7, 8, 9 at full opacity
   tint(255, 255);
-  image(tree2, 0, 0, width, height);
-  image(tree3, 0, 0, width, height);
-  image(tree4, 0, 0, width, height);
-  image(tree5, 0, 0, width, height);
-  image(tree6, 0, 0, width, height);
-  image(tree7, 0, 0, width, height);
-  image(tree8, 0, 0, width, height);
-  image(tree9, 0, 0, width, height);
+  image(tree2, imgX, imgY, imgWidth, imgHeight);
+  image(tree3, imgX, imgY, imgWidth, imgHeight);
+  image(tree4, imgX, imgY, imgWidth, imgHeight);
+  image(tree5, imgX, imgY, imgWidth, imgHeight);
+  image(tree6, imgX, imgY, imgWidth, imgHeight);
+  image(tree7, imgX, imgY, imgWidth, imgHeight);
+  image(tree8, imgX, imgY, imgWidth, imgHeight);
+  image(tree9, imgX, imgY, imgWidth, imgHeight);
   
-  // Draw tree1 on top at full opacity
+  // Draw the selected main tree on top at full opacity
   tint(255, 255);
-  image(tree1, 0, 0, width, height);
+  image(mainTree, imgX, imgY, imgWidth, imgHeight);
   
   // Draw pixelated reveal areas
   noStroke();
   for (let i = revealedPixels.length - 1; i >= 0; i--) {
     let pixel = revealedPixels[i];
-    let x = pixel.x * pixelSize;
-    let y = pixel.y * pixelSize;
+    let x = imgX + pixel.x * pixelSize;
+    let y = imgY + pixel.y * pixelSize;
     
     // Calculate time elapsed since reveal
     let elapsed = millis() - pixel.revealTime;
@@ -83,27 +110,27 @@ function draw() {
     if (rand < noiseProbability) {
       currentChoice = 0; // Noise
     } else {
-      // Calculate tree1 probability - increases in last 4 seconds before fade out, stays 100% during fadeout
-      let tree1Probability = 1.0 / 9.0; // Default equal distribution (11.1%)
+      // Calculate main tree probability - increases in last 4 seconds before fade out, stays 100% during fadeout
+      let mainTreeProbability = 1.0 / 9.0; // Default equal distribution (11.1%)
       
       if (elapsed > fadeStartTime - 4000 && elapsed < fadeStartTime) {
-        // Gradually increase tree1 probability from 11.1% to 100% in last 4 seconds before fadeout
+        // Gradually increase main tree probability from 11.1% to 100% in last 4 seconds before fadeout
         let progressToFade = (elapsed - (fadeStartTime - 4000)) / 4000;
-        tree1Probability = (1.0 / 9.0) + progressToFade * (1.0 - 1.0 / 9.0);
+        mainTreeProbability = (1.0 / 9.0) + progressToFade * (1.0 - 1.0 / 9.0);
       } else if (elapsed >= fadeStartTime) {
         // Keep at 100% during fadeout
-        tree1Probability = 1.0;
+        mainTreeProbability = 1.0;
       }
       
       // Select from trees 1-9 with weighted probability
       let treeRand = random();
-      if (treeRand < tree1Probability) {
-        currentChoice = 1; // tree1
+      if (treeRand < mainTreeProbability) {
+        currentChoice = mainTreeIndex; // Use the selected main tree
       } else {
         // Distribute remaining probability equally among trees 2-9
-        let remainingProb = 1.0 - tree1Probability;
+        let remainingProb = 1.0 - mainTreeProbability;
         let eachOtherProb = remainingProb / 8.0;
-        let adjustedRand = (treeRand - tree1Probability) / remainingProb;
+        let adjustedRand = (treeRand - mainTreeProbability) / remainingProb;
         currentChoice = floor(adjustedRand * 8) + 2; // trees 2-9
       }
     }
@@ -122,18 +149,18 @@ function draw() {
     else if (currentChoice === 8) selectedImage = tree8;
     else selectedImage = tree9;
     
-    let sx = x * selectedImage.width / width;
-    let sy = y * selectedImage.height / height;
-    let sw = pixelSize * selectedImage.width / width;
-    let sh = pixelSize * selectedImage.height / height;
+    let sx = (x - imgX) * selectedImage.width / imgWidth;
+    let sy = (y - imgY) * selectedImage.height / imgHeight;
+    let sw = pixelSize * selectedImage.width / imgWidth;
+    let sh = pixelSize * selectedImage.height / imgHeight;
     
     // If showing noise during first 6 seconds, add random pixel shifts
     if (currentChoice === 0 && elapsed < 6000) {
       randomSeed(pixel.randomSeed + flickerIndex + 999);
-      let shiftX = floor(random(width / pixelSize)) * pixelSize;
-      let shiftY = floor(random(height / pixelSize)) * pixelSize;
-      sx = shiftX * selectedImage.width / width;
-      sy = shiftY * selectedImage.height / height;
+      let shiftX = floor(random(imgWidth / pixelSize)) * pixelSize;
+      let shiftY = floor(random(imgHeight / pixelSize)) * pixelSize;
+      sx = shiftX * selectedImage.width / imgWidth;
+      sy = shiftY * selectedImage.height / imgHeight;
       randomSeed(); // Reset random seed
     }
     
@@ -155,6 +182,17 @@ function draw() {
     image(selectedImage, x, y, pixelSize, pixelSize, sx, sy, sw, sh);
   }
   
+  // Draw title
+  noTint();
+  textAlign(CENTER, TOP);
+  textFont('Courier New');
+  textSize(15);
+  fill('rgb(0, 0, 0)');
+  
+  
+  text('Drag 1 finger/mouse on the area to inspect', width / 2, 20);
+  noStroke();
+  
   // Draw preview rectangle while dragging
   if (isDragging) {
     noFill();
@@ -170,7 +208,7 @@ function draw() {
 function sampleOverlappedColor(x, y) {
   // Randomly select either tree2 or tree3
   let selectedTree = random() > 0.5 ? tree2 : tree3;
-  let col = selectedTree.get(x * selectedTree.width / width, y * selectedTree.height / height);
+  let col = selectedTree.get((x - imgX) * selectedTree.width / imgWidth, (y - imgY) * selectedTree.height / imgHeight);
   
   return col;
 }
@@ -205,10 +243,11 @@ function handleRelease(endX, endY) {
     
     for (let x = x1; x < x2; x += pixelSize) {
       for (let y = y1; y < y2; y += pixelSize) {
-        let px = floor(x / pixelSize);
-        let py = floor(y / pixelSize);
+        // Convert screen coordinates to image coordinates
+        let px = floor((x - imgX) / pixelSize);
+        let py = floor((y - imgY) / pixelSize);
         
-        if (px >= 0 && py >= 0 && px < width / pixelSize && py < height / pixelSize) {
+        if (px >= 0 && py >= 0 && px < imgWidth / pixelSize && py < imgHeight / pixelSize) {
           // Check if this pixel is already revealed
           let existingIndex = revealedPixels.findIndex(p => p.x === px && p.y === py);
           
