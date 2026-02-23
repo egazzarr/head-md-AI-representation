@@ -4,8 +4,7 @@
 
 ### Test our project [HERE](https://egazzarr.github.io/head-md-AI-representation/)!
 
-<img src="gif.gif" width="350">
-
+![](gif.gif)
 
 ### OUR PROJECT: HOW DOES AI *REPRESENT* THINGS?
 
